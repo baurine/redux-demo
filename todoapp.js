@@ -3,6 +3,23 @@
 
 /////////////////////////////////////////////////
 
+// define Action Creator
+
+const addTodo = (id, text) => {
+  return {
+    type: 'ADD_TODO',
+    id,
+    text
+  }
+}
+
+const toggleTodo = (id) => {
+  return {
+    type: 'TOGGLE_TODO',
+    id
+  }
+}
+
 // define Reducer
 
 const todos = (state = [], action) => {
@@ -49,11 +66,7 @@ class AddTodo extends Component {
       <div>
         <input type='input' ref={node=>this.input=node}/>
         <button onClick={()=>{
-          store.dispatch({
-            type: 'ADD_TODO',
-            id: nextId++,
-            text: this.input.value
-          })
+          store.dispatch(addTodo(nextId++, this.input.value))
           this.input.value=''
         }}>
           Add Todo
@@ -74,10 +87,7 @@ class TodoList extends Component {
             return (
               <li key={todo.id}
                   onClick={()=>{
-                    store.dispatch({
-                      type: 'TOGGLE_TODO',
-                      id: todo.id
-                    })
+                    store.dispatch(toggleTodo(todo.id))
                   }}
                   style={{
                     textDecoration: todo.completed? 'line-through':'none'
@@ -121,6 +131,8 @@ class TodoApp extends Component {
     )
   }
 }
+
+/////////////////////////////////////////////////
 
 const render = () => {
   console.log(store.getState())
