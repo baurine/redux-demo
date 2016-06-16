@@ -192,7 +192,7 @@ class TodoApp extends Component {
 
         <TodoList todos={this.props.todos}/>
 
-        <TodoFilter/>
+        <TodoFilter currentFilter={this.props.visibilityFilter}/>
 
       </div>
     )
@@ -205,7 +205,7 @@ const render = () => {
   console.log(store.getState())
   
   ReactDOM.render(
-    <TodoApp todos={store.getState().todos}/>,
+    <TodoApp {...store.getState()}/>,
     document.getElementById('root')
   )
 }
