@@ -77,17 +77,19 @@ const rootReducer = combineReducers({
 
 const { Component } = React
 
+const { connect } = ReactRedux
+
 let nextId = 3
 
 class AddTodo extends Component {
   render() {
-    const { store } = this.context
+    const { dispatch } = this.props
     
     return (
       <div>
         <input type='input' ref={node=>this.input=node}/>
         <button onClick={()=>{
-          store.dispatch(addTodo(nextId++, this.input.value))
+          dispatch(addTodo(nextId++, this.input.value))
           this.input.value=''
         }}>
           Add Todo
@@ -96,27 +98,12 @@ class AddTodo extends Component {
     )
   }
 }
-AddTodo.contextTypes = {
-  store: React.PropTypes.object
-}
+AddTodo = connect()(AddTodo)
 
-class TodoList extends Component {
-  componentDidMount() {
-    const { store } = this.context;
-    this.unscrible = store.subscribe(()=>{
-      this.forceUpdate()
-    })
-  }
-  
-  componentWillUnmount() {
-    this.unscrible()
-  }
-  
+
+class TodoList extends Component {  
   render() {
-    console.log(this.context)
-    const { store } = this.context
-    console.log(store.getState())
-    const { todos, visibilityFilter } = store.getState()
+    const { todos, visibilityFilter, dispatch } = this.props
     
     return (
       <div>
@@ -125,7 +112,7 @@ class TodoList extends Component {
             return (
               <li key={todo.id}
                   onClick={()=>{
-                    store.dispatch(toggleTodo(todo.id))
+                    dispatch(toggleTodo(todo.id))
                   }}
                   style={{
                     textDecoration: todo.completed? 'line-through':'none'
@@ -139,9 +126,13 @@ class TodoList extends Component {
     )
   }
 }
-TodoList.contextTypes = {
-  store: React.PropTypes.object
+const mapTodoListState = (state) => {
+  return {
+    todos: state.todos,
+    visibilityFilter: state.visibilityFilter
+  }
 }
+TodoList = connect(mapTodoListState)(TodoList)
 
 class TodoFilter extends Component {
   render() {
@@ -169,37 +160,37 @@ class TodoFilter extends Component {
 }
 
 // Container Component
-class FilterLink extends Component {
-  componentDidMount() {
-    const { store } = this.context;
-    this.unscrible = store.subscribe(()=>{
-      this.forceUpdate()
-    })
-  }
+// class FilterLink extends Component {
+//   componentDidMount() {
+//     const { store } = this.context;
+//     this.unscrible = store.subscribe(()=>{
+//       this.forceUpdate()
+//     })
+//   }
   
-  componentWillUnmount() {
-    this.unscrible()
-  }
+//   componentWillUnmount() {
+//     this.unscrible()
+//   }
   
-  render() {
-    const { store } = this.context
-    const { visibilityFilter } = store.getState()
-    const { filter, children } = this.props
-    const active = visibilityFilter === filter
+//   render() {
+//     const { store } = this.context
+//     const { visibilityFilter } = store.getState()
+//     const { filter, children } = this.props
+//     const active = visibilityFilter === filter
     
-    return (
-      <Link active={active}
-            onClick={()=>store.dispatch(filterTodo(filter))}>
-        {children}
-      </Link>
-    )
-  }
-}
-FilterLink.contextTypes = {
-  store: React.PropTypes.object
-}
+//     return (
+//       <Link active={active}
+//             onClick={()=>store.dispatch(filterTodo(filter))}>
+//         {children}
+//       </Link>
+//     )
+//   }
+// }
+// FilterLink.contextTypes = {
+//   store: React.PropTypes.object
+// }
 
-// Presenter Component (Dumb Componet, just display data of props)
+// Presentation Component (Dumb Componet, just display data of props)
 class Link extends Component {
   
   render() {
@@ -226,6 +217,19 @@ Link.propTypes = {
   filter: React.PropTypes.string,
   currentFilter: React.PropTypes.string
 }
+
+// use connect replace self implemention of ContainerComponent
+const mapFilterLinkState = (state, ownProps) => {
+  return {
+    active: state.visibilityFilter === ownProps.filter
+  }
+}
+const mapFilterLinkActions = (dispatch, ownProps) => {
+  return {
+    onClick: ()=>dispatch(filterTodo(ownProps.filter))
+  }
+}
+const FilterLink = connect(mapFilterLinkState, mapFilterLinkActions)(Link)
 
 /////////////////////////////////////////////////
 
