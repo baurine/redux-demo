@@ -1,6 +1,34 @@
 // ^^^ notice! must select ES6/Babel compile
 // jsbin.com
 
+/////////////////////////////////////////////////
+
+// define Reducer
+
+const todos = (state = [], action) => {
+  switch (action.type) {
+    case 'ADD_TODO':
+      return [
+        ...state,
+        {
+          id: action.id,
+          text: action.text,
+          completed: false
+        }
+      ];
+    default:
+      return state;
+  }
+}
+
+// create Store
+
+const { createStore } = Redux;
+
+const store = createStore(todos);
+
+/////////////////////////////////////////////////
+
 const { Component } = React
 
 let nextId = 3
