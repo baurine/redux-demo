@@ -30,7 +30,13 @@ class TodoList extends Component {
         <ul>
           {todos.map((todo)=>{
             return (
-              <li key={todo.id}>{todo.text}</li>
+              <li key={todo.id}
+                  onClick={()=>this.props.onToggle(todo.id)}
+                  style={{
+                    textDecoration: todo.completed? 'line-through':'none'
+                  }}>
+                {todo.text}
+              </li>
             ) 
           })}
         </ul>
@@ -57,8 +63,8 @@ class TodoApp extends Component {
     super()
     this.state = {
       todos: [
-        {id: 1, text: 'Learn Redux'},
-        {id: 2, text: 'Go Shopping'}
+        {id: 1, text: 'Learn Redux', completed: true},
+        {id: 2, text: 'Go Shopping', completed: false}
       ]
     }
   }
@@ -71,13 +77,25 @@ class TodoApp extends Component {
     this.setState({todos: this.state.todos})
   }
   
+  _onToggleTodo(id) {
+    this.state.todos.forEach((todo)=>{
+      if (todo.id === id) {
+        todo.completed = !todo.completed
+      }
+    })
+    
+    // invoke render() call
+    this.setState({todos: this.state.todos})
+  }
+  
   render() {
     return (
       <div>
 
         <AddTodo onClick={(todo)=>this._onAddTodo(todo)}/>
 
-        <TodoList todos={this.state.todos}/>
+        <TodoList todos={this.state.todos}
+                  onToggle={(id)=>this._onToggleTodo(id)}/>
 
         <TodoFilter/>
 
@@ -94,3 +112,5 @@ const render = () => {
 }
 
 render()
+
+
