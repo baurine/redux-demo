@@ -7,8 +7,13 @@ class AddTodo extends Component {
   render() {
     return (
       <div>
-        <input type='input'/>
-        <button>Add Todo</button>
+        <input type='input' ref={node=>this.input=node}/>
+        <button onClick={()=>{
+          this.props.onClick({text: this.input.value})
+          this.input.value=''
+        }}>
+          Add Todo
+        </button>
       </div>
     )
   }
@@ -41,11 +46,29 @@ class TodoFilter extends Component {
 }
 
 class TodoApp extends Component {
+  constructor() {
+    super()
+    this.state = {
+      todos: [
+        {text: 'Learn Redux'},
+        {text: 'Go Shopping'}
+      ]
+    }
+  }
+  
+  _onAddTodo(todo) {
+    this.state.todos.push(todo)
+    console.log(this.state.todos)
+    
+    // invoke render() call
+    // this.setState({todos: this.state.todos})
+  }
+  
   render() {
     return (
       <div>
 
-        <AddTodo/>
+        <AddTodo onClick={(todo)=>this._onAddTodo(todo)}/>
 
         <TodoList/>
 
