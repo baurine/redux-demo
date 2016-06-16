@@ -15,17 +15,17 @@ const todos = (state = [], action) => {
           text: action.text,
           completed: false
         }
-      ];
+      ]
     default:
-      return state;
+      return state
   }
 }
 
 // create Store
 
-const { createStore } = Redux;
+const { createStore } = Redux
 
-const store = createStore(todos);
+const store = createStore(todos)
 
 /////////////////////////////////////////////////
 
@@ -39,7 +39,11 @@ class AddTodo extends Component {
       <div>
         <input type='input' ref={node=>this.input=node}/>
         <button onClick={()=>{
-          this.props.onClick({id: nextId++, text: this.input.value})
+          store.dispatch({
+            type: 'ADD_TODO',
+            id: nextId++,
+            text: this.input.value
+          })
           this.input.value=''
         }}>
           Add Todo
@@ -97,14 +101,6 @@ class TodoApp extends Component {
     }
   }
   
-  _onAddTodo(todo) {
-    this.state.todos.push(todo)
-    console.log(this.state.todos)
-    
-    // invoke render() call
-    this.setState({todos: this.state.todos})
-  }
-  
   _onToggleTodo(id) {
     this.state.todos.forEach((todo)=>{
       if (todo.id === id) {
@@ -120,7 +116,7 @@ class TodoApp extends Component {
     return (
       <div>
 
-        <AddTodo onClick={(todo)=>this._onAddTodo(todo)}/>
+        <AddTodo />
 
         <TodoList todos={this.state.todos}
                   onToggle={(id)=>this._onToggleTodo(id)}/>
@@ -133,6 +129,7 @@ class TodoApp extends Component {
 }
 
 const render = () => {
+  console.log(store.getState())
   ReactDOM.render(
     <TodoApp/>,
     document.getElementById('root')
@@ -140,5 +137,5 @@ const render = () => {
 }
 
 render()
-
+store.subscribe(render)
 
