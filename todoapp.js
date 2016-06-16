@@ -3,13 +3,15 @@
 
 const { Component } = React
 
+let nextId = 3
+
 class AddTodo extends Component {
   render() {
     return (
       <div>
         <input type='input' ref={node=>this.input=node}/>
         <button onClick={()=>{
-          this.props.onClick({text: this.input.value})
+          this.props.onClick({id: nextId++, text: this.input.value})
           this.input.value=''
         }}>
           Add Todo
@@ -21,11 +23,16 @@ class AddTodo extends Component {
 
 class TodoList extends Component {
   render() {
+    const { todos } = this.props
+    
     return (
       <div>
         <ul>
-          <li>Learn Redux</li>
-          <li>Go Shopping</li>
+          {todos.map((todo)=>{
+            return (
+              <li key={todo.id}>{todo.text}</li>
+            ) 
+          })}
         </ul>
       </div>
     )
@@ -50,8 +57,8 @@ class TodoApp extends Component {
     super()
     this.state = {
       todos: [
-        {text: 'Learn Redux'},
-        {text: 'Go Shopping'}
+        {id: 1, text: 'Learn Redux'},
+        {id: 2, text: 'Go Shopping'}
       ]
     }
   }
@@ -61,7 +68,7 @@ class TodoApp extends Component {
     console.log(this.state.todos)
     
     // invoke render() call
-    // this.setState({todos: this.state.todos})
+    this.setState({todos: this.state.todos})
   }
   
   render() {
@@ -70,7 +77,7 @@ class TodoApp extends Component {
 
         <AddTodo onClick={(todo)=>this._onAddTodo(todo)}/>
 
-        <TodoList/>
+        <TodoList todos={this.state.todos}/>
 
         <TodoFilter/>
 
