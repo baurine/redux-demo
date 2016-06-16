@@ -16,6 +16,16 @@ const todos = (state = [], action) => {
           completed: false
         }
       ]
+    case 'TOGGLE_TODO':
+      return state.map((todo)=>{
+        if (todo.id !== action.id) {
+          return todo
+        }
+        return {
+          ...todo,
+          completed: !todo.completed
+        }
+      })
     default:
       return state
   }
@@ -63,7 +73,12 @@ class TodoList extends Component {
           {todos.map((todo)=>{
             return (
               <li key={todo.id}
-                  onClick={()=>this.props.onToggle(todo.id)}
+                  onClick={()=>{
+                    store.dispatch({
+                      type: 'TOGGLE_TODO',
+                      id: todo.id
+                    })
+                  }}
                   style={{
                     textDecoration: todo.completed? 'line-through':'none'
                   }}>
@@ -91,26 +106,6 @@ class TodoFilter extends Component {
 }
 
 class TodoApp extends Component {
-  constructor() {
-    super()
-    this.state = {
-      todos: [
-        {id: 1, text: 'Learn Redux', completed: true},
-        {id: 2, text: 'Go Shopping', completed: false}
-      ]
-    }
-  }
-  
-  _onToggleTodo(id) {
-    this.state.todos.forEach((todo)=>{
-      if (todo.id === id) {
-        todo.completed = !todo.completed
-      }
-    })
-    
-    // invoke render() call
-    this.setState({todos: this.state.todos})
-  }
   
   render() {
     return (
@@ -118,8 +113,7 @@ class TodoApp extends Component {
 
         <AddTodo />
 
-        <TodoList todos={this.state.todos}
-                  onToggle={(id)=>this._onToggleTodo(id)}/>
+        <TodoList todos={this.props.todos}/>
 
         <TodoFilter/>
 
@@ -130,8 +124,9 @@ class TodoApp extends Component {
 
 const render = () => {
   console.log(store.getState())
+  
   ReactDOM.render(
-    <TodoApp/>,
+    <TodoApp todos={store.getState()}/>,
     document.getElementById('root')
   )
 }
