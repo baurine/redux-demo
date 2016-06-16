@@ -20,8 +20,14 @@ const toggleTodo = (id) => {
   }
 }
 
-// define Reducer
+const filterTodo = (filter) => {
+  return {
+    type: 'SET_VISIBILITY_FILTER',
+    filter
+  }
+}
 
+// define Reducer
 const todos = (state = [], action) => {
   switch (action.type) {
     case 'ADD_TODO':
@@ -48,11 +54,26 @@ const todos = (state = [], action) => {
   }
 }
 
+// another reducer
+const visibilityFilter = (state = 'SHOW_ALL', action) => {
+  switch (action.type) {
+    case 'SET_VISIBILITY_FILTER':
+      return action.filter
+    default:
+      return state
+  }
+}
+
 // create Store
 
-const { createStore } = Redux
+const { combineReducers, createStore } = Redux
 
-const store = createStore(todos)
+const rootReducer = combineReducers({
+  todos,
+  visibilityFilter
+})
+
+const store = createStore(rootReducer)
 
 /////////////////////////////////////////////////
 
@@ -115,6 +136,8 @@ class TodoFilter extends Component {
   }
 }
 
+/////////////////////////////////////////////////
+
 class TodoApp extends Component {
   
   render() {
@@ -138,7 +161,7 @@ const render = () => {
   console.log(store.getState())
   
   ReactDOM.render(
-    <TodoApp todos={store.getState()}/>,
+    <TodoApp todos={store.getState().todos}/>,
     document.getElementById('root')
   )
 }
