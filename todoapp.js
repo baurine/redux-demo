@@ -182,15 +182,28 @@ Link.propTypes = {
 
 /////////////////////////////////////////////////
 
+const getFilterTodos = (todos, filter) => {
+  switch (filter) {
+    case 'SHOW_ALL':
+      return todos
+    case 'SHOW_ACTIVE':
+      return todos.filter(t=>!t.completed)
+    case 'SHOW_COMPLETED':
+      return todos.filter(t=>t.completed)
+  }
+}
+
 class TodoApp extends Component {
   
   render() {
+    const { todos, visibilityFilter } = this.props
+    
     return (
       <div>
 
         <AddTodo />
 
-        <TodoList todos={this.props.todos}/>
+        <TodoList todos={getFilterTodos(todos, visibilityFilter)}/>
 
         <TodoFilter currentFilter={this.props.visibilityFilter}/>
 
