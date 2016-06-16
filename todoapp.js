@@ -73,8 +73,6 @@ const rootReducer = combineReducers({
   visibilityFilter
 })
 
-const store = createStore(rootReducer)
-
 /////////////////////////////////////////////////
 
 const { Component } = React
@@ -83,6 +81,8 @@ let nextId = 3
 
 class AddTodo extends Component {
   render() {
+    const { store } = this.context
+    
     return (
       <div>
         <input type='input' ref={node=>this.input=node}/>
@@ -96,15 +96,32 @@ class AddTodo extends Component {
     )
   }
 }
+AddTodo.contextTypes = {
+  store: React.PropTypes.object
+}
 
 class TodoList extends Component {
+  componentDidMount() {
+    const { store } = this.context;
+    this.unscrible = store.subscribe(()=>{
+      this.forceUpdate()
+    })
+  }
+  
+  componentWillUnmount() {
+    this.unscrible()
+  }
+  
   render() {
-    const { todos } = this.props
+    console.log(this.context)
+    const { store } = this.context
+    console.log(store.getState())
+    const { todos, visibilityFilter } = store.getState()
     
     return (
       <div>
         <ul>
-          {todos.map((todo)=>{
+          {getFilterTodos(todos, visibilityFilter).map((todo)=>{
             return (
               <li key={todo.id}
                   onClick={()=>{
@@ -122,43 +139,73 @@ class TodoList extends Component {
     )
   }
 }
+TodoList.contextTypes = {
+  store: React.PropTypes.object
+}
 
 class TodoFilter extends Component {
   render() {
-    const { currentFilter } = this.props
-    
     return (
       <p>
         Show:
         {' '}
-        <Link 
-          filter='SHOW_ALL' 
-          currentFilter={currentFilter}>
+        <FilterLink 
+          filter='SHOW_ALL' >
           All
-        </Link>
+        </FilterLink>
         {' '}
-        <Link 
-          filter='SHOW_ACTIVE' 
-          currentFilter={currentFilter}>
+        <FilterLink 
+          filter='SHOW_ACTIVE'> 
           Active
-        </Link>
+        </FilterLink>
         {' '}
-        <Link 
-          filter='SHOW_COMPLETED' 
-          currentFilter={currentFilter}>
+        <FilterLink 
+          filter='SHOW_COMPLETED'>
           Completed
-        </Link>
+        </FilterLink>
       </p>
     )
   }
 }
 
+// Container Component
+class FilterLink extends Component {
+  componentDidMount() {
+    const { store } = this.context;
+    this.unscrible = store.subscribe(()=>{
+      this.forceUpdate()
+    })
+  }
+  
+  componentWillUnmount() {
+    this.unscrible()
+  }
+  
+  render() {
+    const { store } = this.context
+    const { visibilityFilter } = store.getState()
+    const { filter, children } = this.props
+    const active = visibilityFilter === filter
+    
+    return (
+      <Link active={active}
+            onClick={()=>store.dispatch(filterTodo(filter))}>
+        {children}
+      </Link>
+    )
+  }
+}
+FilterLink.contextTypes = {
+  store: React.PropTypes.object
+}
+
+// Presenter Component (Dumb Componet, just display data of props)
 class Link extends Component {
   
   render() {
-    const { filter, currentFilter, children } = this.props
+    const { active, onClick, children } = this.props
     
-    if (filter === currentFilter) {
+    if (active) {
       return (
         <span>{children}</span>
       )
@@ -168,7 +215,7 @@ class Link extends Component {
       <a href='#'
          onClick={(e)=>{
            e.preventDefault()
-           store.dispatch(filterTodo(filter))
+           onClick()
          }}>
         {children}
       </a>
@@ -196,16 +243,15 @@ const getFilterTodos = (todos, filter) => {
 class TodoApp extends Component {
   
   render() {
-    const { todos, visibilityFilter } = this.props
     
     return (
       <div>
 
         <AddTodo />
 
-        <TodoList todos={getFilterTodos(todos, visibilityFilter)}/>
+        <TodoList />
 
-        <TodoFilter currentFilter={this.props.visibilityFilter}/>
+        <TodoFilter />
 
       </div>
     )
@@ -214,15 +260,16 @@ class TodoApp extends Component {
 
 /////////////////////////////////////////////////
 
-const render = () => {
-  console.log(store.getState())
-  
+const { Provider } = ReactRedux
+
+const render = () => {  
   ReactDOM.render(
-    <TodoApp {...store.getState()}/>,
+    <Provider store={createStore(rootReducer)}>
+      <TodoApp />
+    </Provider>,
     document.getElementById('root')
   )
 }
 
 render()
-store.subscribe(render)
 
